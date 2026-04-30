@@ -6,19 +6,15 @@ import logging
 from pathlib import Path
 import imageio_ffmpeg
 
-# ================= CONFIG =================
 BASE_DIR = Path(__file__).resolve().parent
 CONFIG_FILE = BASE_DIR / "config.json"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-
 def load_config():
     cfg = json.load(open(CONFIG_FILE, encoding="utf-8"))
     return cfg["video_cut"]
 
-
-# ================= UTILS =================
 def time_to_seconds(t):
     parts = list(map(float, t.strip().split(":")))
     if len(parts) == 2:
@@ -28,10 +24,8 @@ def time_to_seconds(t):
     else:
         raise ValueError(f"Invalid time format: {t}")
 
-
 def sanitize_filename(name):
     return "".join(c for c in name if c.isalnum() or c in (" ", "_", "-")).strip().replace(" ", "_")
-
 
 def parse_bitrate(b):
     b = b.lower().strip()
@@ -41,8 +35,6 @@ def parse_bitrate(b):
         return int(b[:-1]) * 1000
     raise ValueError(f"Invalid bitrate format: {b}")
 
-
-# ================= CORE =================
 def cut_video(video_path, start, end, label, cfg, output_dir):
     ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
 
@@ -109,8 +101,6 @@ def cut_video(video_path, start, end, label, cfg, output_dir):
     subprocess.run(cmd, check=True)
     logging.info(f"Saved: {output_file.name}")
 
-
-# ================= MAIN =================
 def main():
     if len(sys.argv) < 3:
         print("Usage: python video_cut.py <cuts.csv> <video.mp4>")
@@ -144,7 +134,6 @@ def main():
                 cut_video(video_file, start, end, label, cfg, output_dir)
             except Exception as e:
                 logging.error(f"Error processing cut {label}: {e}")
-
 
 if __name__ == "__main__":
     main()

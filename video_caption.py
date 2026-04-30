@@ -12,34 +12,21 @@ TASKS_FILE = BASE_DIR / "tasks.json"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-
-# ================= CONFIG =================
-
 def load_config():
     return json.load(open(CONFIG_FILE, encoding="utf-8"))["video_caption"]
-
 
 def load_tasks():
     if not TASKS_FILE.exists():
         return []
     return json.load(open(TASKS_FILE, encoding="utf-8"))
 
-
-# ================= FONT =================
-
 def resolve_font(font_name):
-    """
-    Fonte sempre na mesma pasta do config/script
-    """
     path = BASE_DIR / font_name
 
     if path.exists():
         return str(path)
 
     raise FileNotFoundError(f"Fonte não encontrada: {font_name}")
-
-
-# ================= TEXT =================
 
 def split_text(text):
     words = text.split()
@@ -49,7 +36,6 @@ def split_text(text):
 
     mid = len(words) // 2
     return " ".join(words[:mid]) + "\n" + " ".join(words[mid:])
-
 
 def build_text_clip(text, style, video_size, color):
     font = resolve_font(style["font"])
@@ -63,9 +49,6 @@ def build_text_clip(text, style, video_size, color):
         size=(int(video_size[0] * 0.8), None),
         interline=style.get("interline", 0),
     )
-
-
-# ================= PROCESS =================
 
 def process_task(task, cfg):
     input_path = Path(task["input"])
@@ -88,7 +71,6 @@ def process_task(task, cfg):
 
     layers = [clip]
 
-    # ================= BASE =================
     base = build_text_clip(
         text,
         style,
@@ -96,7 +78,6 @@ def process_task(task, cfg):
         style.get("color_default", "white")
     ).with_duration(clip.duration).with_position(("center", "bottom"))
 
-    # ================= SHADOW =================
     if style.get("show_shadow"):
         shadow = build_text_clip(
             text,
@@ -110,7 +91,6 @@ def process_task(task, cfg):
             "bottom"
         ))
 
-        # aplica offset
         shadow = shadow.with_position((
             style.get("shadow_offset_x", 5),
             style.get("shadow_offset_y", 5)
@@ -118,7 +98,6 @@ def process_task(task, cfg):
 
         layers.append(shadow)
 
-    # ================= STROKE =================
     if style.get("show_stroke"):
         sw = style.get("stroke_width", 2)
 
@@ -134,10 +113,8 @@ def process_task(task, cfg):
                 stroke = stroke.with_position(("center", "bottom"))
                 layers.append(stroke)
 
-    # BASE por último (fica acima)
     layers.append(base)
 
-    # ================= HIGHLIGHT =================
     highlight_word = task.get("highlight")
 
     if highlight_word and highlight_word in text:
@@ -150,7 +127,6 @@ def process_task(task, cfg):
 
         layers.append(highlight)
 
-    # ================= COMPOSE =================
     final = CompositeVideoClip(layers)
 
     final.write_videofile(
@@ -166,9 +142,6 @@ def process_task(task, cfg):
 
     logging.info(f"Gerado: {output_path.name}")
 
-
-# ================= MAIN =================
-
 def main():
     cfg = load_config()
     tasks = load_tasks()
@@ -179,7 +152,6 @@ def main():
         except Exception as e:
             logging.error(f"Erro: {e}")
             traceback.print_exc()
-
 
 if __name__ == "__main__":
     main()

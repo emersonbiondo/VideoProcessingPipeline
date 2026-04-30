@@ -14,9 +14,6 @@ CONFIG_FILE = BASE_DIR / "config.json"
 
 logging.basicConfig(level=logging.INFO, format="%(levelname)s: %(message)s")
 
-
-# ================= CONFIG =================
-
 def load_config():
     if not CONFIG_FILE.exists():
         raise FileNotFoundError(f"config.json not found: {CONFIG_FILE}")
@@ -27,9 +24,6 @@ def load_config():
         raise ValueError("Missing 'video_processor'")
 
     return data["video_processor"]
-
-
-# ================= QUEUE =================
 
 def write_queue_success(cfg, video_path):
     try:
@@ -48,9 +42,6 @@ def write_queue_error(cfg, video_path):
     except Exception as e:
         logging.warning(f"Erro ao escrever queue error: {e}")
 
-
-# ================= UTILS =================
-
 def resize_clip(clip, max_res):
     w, h = clip.size
     if w >= h:
@@ -58,14 +49,12 @@ def resize_clip(clip, max_res):
     else:
         return clip.with_effects([Resize(width=max_res)])
 
-
 def format_srt_time(t):
     h = int(t // 3600)
     m = int((t % 3600) // 60)
     s = int(t % 60)
     ms = int((t - int(t)) * 1000)
     return f"{h:02}:{m:02}:{s:02},{ms:03}"
-
 
 def safe_remove(path, retries=5, delay=0.5):
     if not path or not os.path.exists(path):
@@ -77,9 +66,6 @@ def safe_remove(path, retries=5, delay=0.5):
             return
         except PermissionError:
             time.sleep(delay)
-
-
-# ================= CORE =================
 
 def process_video(video_path, cfg):
     video_path = Path(video_path)
@@ -102,7 +88,6 @@ def process_video(video_path, cfg):
     transcription_result = None
 
     try:
-        # ================= WAV =================
         if need_transcription or need_subtitle:
             clip = VideoFileClip(str(video_path))
 
@@ -119,7 +104,6 @@ def process_video(video_path, cfg):
 
             clip.close()
 
-        # ================= TRANSCRIPTION =================
         if need_transcription and wav_path:
             import whisper
             logging.info("Running transcription...")
@@ -132,7 +116,6 @@ def process_video(video_path, cfg):
                 encoding="utf-8"
             )
 
-        # ================= SUBTITLE =================
         if need_subtitle and transcription_result:
             logging.info("Generating subtitles...")
 
@@ -144,7 +127,6 @@ def process_video(video_path, cfg):
                     )
                     f.write(seg["text"].strip() + "\n\n")
 
-        # ================= AUDIO EXPORT =================
         if need_audio:
             clip = VideoFileClip(str(video_path))
 
@@ -160,7 +142,6 @@ def process_video(video_path, cfg):
 
             clip.close()
 
-        # ================= ENCODE =================
         for attempt in range(cfg["queue"]["max_retries"] + 1):
             try:
                 logging.info(f"Encoding video (attempt {attempt+1})...")
@@ -195,7 +176,6 @@ def process_video(video_path, cfg):
                 else:
                     raise
 
-        # ================= SUCCESS =================
         write_queue_success(cfg, video_path)
 
     except Exception as e:
@@ -208,9 +188,6 @@ def process_video(video_path, cfg):
 
     logging.info(f"Done: {video_path.name}")
     return True
-
-
-# ================= MAIN =================
 
 def main():
     if len(sys.argv) < 2:
@@ -226,7 +203,6 @@ def main():
             process_video(v, cfg)
     else:
         process_video(input_path, cfg)
-
 
 if __name__ == "__main__":
     main()

@@ -1,29 +1,29 @@
-# 🎬 Video Processing Pipeline
+# Video Processing Pipeline
 
 Pipeline modular em Python para processamento completo de vídeo:
 
-* 🎬 Encode e compressão (MoviePy)
-* ✂️ Corte (FFmpeg – fast e precise)
-* 🧠 Caption com hook + highlight (MoviePy)
-* 📂 Processamento em lote (queue)
-* ⚡ Execução paralela
-* 🔁 Retry automático
-* 🎯 Encode profissional (HEVC Main10 CBR)
+* Encode e compressão (MoviePy)
+* Corte (FFmpeg – fast e precise)
+* Caption com hook + highlight (MoviePy)
+* Processamento em lote (queue)
+* Execução paralela
+* Retry automático
+* Encode profissional (HEVC Main10 CBR)
 
 ---
 
-# 🧠 Arquitetura
+# Arquitetura
 
 ```text
 Video Processing Pipeline/
 │
-├── video_processor.py   🎬 encode / fila
-├── video_cut.py         ✂️ corte via CSV
-├── video_caption.py     🧠 hook + highlight
-├── config.json          ⚙️ config central
-├── tasks.json           📄 tarefas caption
-├── fila.txt             📄 lista processor
-├── cortes.csv           📄 lista cortes
+├── video_processor.py    encode / fila
+├── video_cut.py          corte via CSV
+├── video_caption.py      hook + highlight
+├── config.json          ️ config central
+├── tasks.json            tarefas caption
+├── fila.txt              lista processor
+├── cortes.csv            lista cortes
 │
 ├── output/
 │   ├── processor/
@@ -33,40 +33,40 @@ Video Processing Pipeline/
 
 ---
 
-# 🚀 Módulos
+# Módulos
 
-## 🎬 video_processor.py
+## video_processor.py
 
 Processa vídeos com encode configurável.
 
-✔ Resize automático
-✔ Controle de FPS
-✔ Controle de bitrate
-✔ Áudio opcional
-✔ Fila (.txt)
-✔ Paralelismo (multi-core)
-✔ Retry automático
-✔ Logs de sucesso/erro
+- Resize automático
+- Controle de FPS
+- Controle de bitrate
+- Áudio opcional
+- Fila (.txt)
+- Paralelismo (multi-core)
+- Retry automático
+- Logs de sucesso/erro
 
 ---
 
-## ✂️ video_cut.py
+## video_cut.py
 
 Corta vídeos via CSV.
 
-### ⚡ fast
+### fast
 
 ```text
 -c copy
 ```
 
-✔ rápido
-✔ sem perda
-❌ não frame-perfect
+- rápido
+- sem perda
+- não frame-perfect
 
 ---
 
-### 🎯 precise (PROFISSIONAL)
+### precise (PROFISSIONAL)
 
 ```text
 HEVC (H.265)
@@ -75,40 +75,40 @@ CBR real (ex: 85000k)
 preset veryslow
 ```
 
-✔ frame-perfect
-✔ qualidade máxima
-✔ compatível com DaVinci
-✔ encode profissional
+- frame-perfect
+- qualidade máxima
+- compatível com DaVinci
+- encode profissional
 
 ---
 
-## 🧠 video_caption.py
+## video_caption.py
 
 Adiciona hook textual no vídeo.
 
-✔ Texto responsivo
-✔ Highlight de palavra
-✔ Stroke + shadow
-✔ Fade in/out
-✔ Mantém codec original
-✔ Mantém áudio original
+- Texto responsivo
+- Highlight de palavra
+- Stroke + shadow
+- Fade in/out
+- Mantém codec original
+- Mantém áudio original
 
 ---
 
-# 📦 Requisitos
+# Requisitos
 
 ```bash
 pip install moviepy imageio-ffmpeg openai-whisper
 ```
 
-⚠️ IMPORTANTE:
+IMPORTANTE:
 
 * Fontes devem estar instaladas no sistema
 * MoviePy precisa de backend de render (Pillow ou ImageMagick)
 
 ---
 
-# ⚙️ Configuração (`config.json`)
+# Configuração (`config.json`)
 
 ## Estrutura
 
@@ -213,9 +213,9 @@ pip install moviepy imageio-ffmpeg openai-whisper
 
 ---
 
-# ▶️ Uso
+# Uso
 
-## 🎬 Processar vídeo
+## Processar vídeo
 
 ```bash
 python video_processor.py video.mp4
@@ -223,7 +223,7 @@ python video_processor.py video.mp4
 
 ---
 
-## 📂 Processar fila
+## Processar fila
 
 ```bash
 python video_processor.py fila.txt
@@ -231,7 +231,7 @@ python video_processor.py fila.txt
 
 ---
 
-## ✂️ Cortar vídeo
+## Cortar vídeo
 
 CSV:
 
@@ -246,7 +246,7 @@ python video_cut.py cortes.csv video.mp4
 
 ---
 
-## 🧠 Caption
+## Caption
 
 tasks.json:
 
@@ -267,7 +267,7 @@ python video_caption.py
 
 ---
 
-# 📂 Saídas
+# Saídas
 
 ```text
 output/
@@ -285,7 +285,7 @@ output/
 
 ---
 
-# ⚡ Paralelismo
+# Paralelismo
 
 ```json
 "max_workers": 2
@@ -300,6 +300,6 @@ Recomendação:
 
 ---
 
-# 🧾 Licença
+# Licença
 
 Uso livre para automação e projetos próprios.
