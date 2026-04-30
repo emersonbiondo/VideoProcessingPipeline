@@ -1,0 +1,91 @@
+{
+  "video_processor": {
+    "paths": {
+      "output": "output/processor"
+    },
+    "video": {
+      "res_max": 720,
+      "fps": 12,
+      "bitrate": "2000k",
+      "preset": "medium",
+      "pix_fmt": "yuv420p",
+      "audio_codec": "aac",
+      "audio_bitrate": "192k",
+      "mute_video": false
+    },
+    "file": {
+      "suffix": "_processed"
+    },
+    "queue": {
+      "success": "queue_success.txt",
+      "error": "queue_error.txt",
+      "max_retries": 2,
+      "retry_delay": 3,
+      "max_workers": 2
+    },
+    "audio": {
+      "enabled": true,
+      "codec": "libmp3lame",
+      "bitrate": "192k",
+      "extension": "mp3"
+    },
+    "transcription": {
+      "enabled": true,
+      "model": "base"
+    },
+    "subtitle": {
+      "enabled": true
+    }
+  },
+
+  "video_cut": {
+    "paths": {
+      "output": "output/cuts"
+    },
+    "mode": "fast",
+    "precise": {
+      "bitrate": "85000k",
+      "preset": "veryslow",
+      "profile": "main10",
+      "level": "5.1",
+      "audio_codec": "aac",
+      "audio_bitrate": "320k"
+    }
+  },
+
+  "video_caption": {
+    "paths": {
+      "output": "output/caption"
+    },
+    "video": {
+      "threads": 4,
+      "logger": null,
+      "codec": "hevc",
+      "bitrate": "85000k",
+      "pix_fmt": "yuv420p10le",
+      "audio_codec": "aac",
+      "audio_bitrate": "320k"
+    },
+    "hook": {
+      "start_time": 0.5,
+      "duration": 5.0,
+      "pos_y_percent": 0.20,
+      "width_percent": 0.80,
+      "fade_in_duration": 0.3,
+      "fade_out_duration": 0.5
+    },
+    "text_style": {
+      "font": "BebasNeue-Regular.ttf",
+      "font_size": 90,
+      "show_stroke": true,
+      "stroke_width": 2,
+      "show_shadow": true,
+      "shadow_opacity": 0.6,
+      "shadow_offset_x": 5,
+      "shadow_offset_y": 5,
+      "interline": -5,
+      "color_default": "yellow",
+      "color_highlight_word": "white"
+    }
+  }
+}
