@@ -10,7 +10,7 @@ BASE_DIR = Path(__file__).resolve().parents[1]
 CONFIG_FILE = BASE_DIR / "config.json"
 TEST_DIR = BASE_DIR / "test"
 INPUT_VIDEO = TEST_DIR / "input.mp4"
-TASKS_FILE = TEST_DIR / "tasks.json"
+TASKS_FILE = BASE_DIR / "tasks.json"
 OUTPUT_DIR = BASE_DIR / "output" / "caption"
 
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
@@ -33,13 +33,14 @@ def config_backup():
     yield
     CONFIG_FILE.write_text(original, encoding="utf-8")
 
-
 @pytest.fixture
 def tasks_backup():
     original = TASKS_FILE.read_text(encoding="utf-8") if TASKS_FILE.exists() else None
     yield
-    if original:
+    if original is not None:
         TASKS_FILE.write_text(original, encoding="utf-8")
+    elif TASKS_FILE.exists():
+        TASKS_FILE.unlink()
 
 def run_caption(check=True):
     return subprocess.run(
@@ -65,7 +66,6 @@ def update_style(**kwargs):
 
     json.dump(cfg, open(CONFIG_FILE, "w", encoding="utf-8"), indent=2)
 
-
 def output_exists(name):
     path = OUTPUT_DIR / name
     assert path.exists(), f"{name} não foi gerado"
@@ -73,7 +73,6 @@ def output_exists(name):
     return path
 
 def test_single_word_responsive(clean_environment, config_backup, tasks_backup):
-    """1 palavra → centralizado e não quebra"""
     write_tasks([{
         "input": str(INPUT_VIDEO),
         "output": "one_word.mp4",
@@ -84,7 +83,6 @@ def test_single_word_responsive(clean_environment, config_backup, tasks_backup):
     output_exists("one_word.mp4")
 
 def test_three_words_single_line(clean_environment, config_backup, tasks_backup):
-    """3 palavras → 1 linha"""
     write_tasks([{
         "input": str(INPUT_VIDEO),
         "output": "three_words.mp4",
@@ -95,7 +93,6 @@ def test_three_words_single_line(clean_environment, config_backup, tasks_backup)
     output_exists("three_words.mp4")
 
 def test_seven_words_wrap_two_lines(clean_environment, config_backup, tasks_backup):
-    """7 palavras → deve quebrar em 2 linhas"""
     write_tasks([{
         "input": str(INPUT_VIDEO),
         "output": "seven_words.mp4",
@@ -106,7 +103,6 @@ def test_seven_words_wrap_two_lines(clean_environment, config_backup, tasks_back
     output_exists("seven_words.mp4")
 
 def test_no_stroke_no_shadow(clean_environment, config_backup, tasks_backup):
-    """Sem stroke e sem sombra"""
     update_style(show_stroke=False, show_shadow=False)
 
     write_tasks([{
@@ -119,7 +115,6 @@ def test_no_stroke_no_shadow(clean_environment, config_backup, tasks_backup):
     output_exists("no_style.mp4")
 
 def test_with_stroke_only(clean_environment, config_backup, tasks_backup):
-    """Com stroke apenas"""
     update_style(show_stroke=True, show_shadow=False)
 
     write_tasks([{
@@ -132,7 +127,6 @@ def test_with_stroke_only(clean_environment, config_backup, tasks_backup):
     output_exists("stroke_only.mp4")
 
 def test_with_shadow_only(clean_environment, config_backup, tasks_backup):
-    """Com sombra apenas"""
     update_style(show_stroke=False, show_shadow=True)
 
     write_tasks([{
@@ -145,7 +139,6 @@ def test_with_shadow_only(clean_environment, config_backup, tasks_backup):
     output_exists("shadow_only.mp4")
 
 def test_shadow_and_stroke(clean_environment, config_backup, tasks_backup):
-    """Com sombra + stroke"""
     update_style(show_stroke=True, show_shadow=True)
 
     write_tasks([{
@@ -158,7 +151,6 @@ def test_shadow_and_stroke(clean_environment, config_backup, tasks_backup):
     output_exists("shadow_stroke.mp4")
 
 def test_highlight_word(clean_environment, config_backup, tasks_backup):
-    """Valida highlight aplicado"""
     write_tasks([{
         "input": str(INPUT_VIDEO),
         "output": "highlight.mp4",
@@ -170,18 +162,9 @@ def test_highlight_word(clean_environment, config_backup, tasks_backup):
     output_exists("highlight.mp4")
 
 def test_multiple_tasks(clean_environment, config_backup, tasks_backup):
-    """Múltiplos vídeos"""
     write_tasks([
-        {
-            "input": str(INPUT_VIDEO),
-            "output": "t1.mp4",
-            "text": "A"
-        },
-        {
-            "input": str(INPUT_VIDEO),
-            "output": "t2.mp4",
-            "text": "B"
-        }
+        {"input": str(INPUT_VIDEO), "output": "t1.mp4", "text": "A"},
+        {"input": str(INPUT_VIDEO), "output": "t2.mp4", "text": "B"}
     ])
 
     run_caption()
@@ -190,7 +173,6 @@ def test_multiple_tasks(clean_environment, config_backup, tasks_backup):
     assert len(files) == 2
 
 def test_invalid_input(clean_environment, config_backup, tasks_backup):
-    """Input inválido não quebra pipeline"""
     write_tasks([{
         "input": "fake.mp4",
         "output": "fail.mp4",
@@ -202,9 +184,7 @@ def test_invalid_input(clean_environment, config_backup, tasks_backup):
     files = list(OUTPUT_DIR.glob("*.mp4"))
     assert len(files) == 0
 
-
 def test_multiple_runs(clean_environment, config_backup, tasks_backup):
-    """Execução repetida"""
     write_tasks([{
         "input": str(INPUT_VIDEO),
         "output": "repeat.mp4",
