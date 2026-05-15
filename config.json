@@ -88,7 +88,216 @@
       "color_highlight_word": "white"
     }
   },
-  
+  "video_publish": {
+	"paths": {
+	  "output": "output/publish"
+	},
+    "queue": {
+	  "max_workers": 2,
+	  "max_retries": 2,
+	  "retry_delay": 3
+	},
+	"presets": [
+		{
+		  "name": "max_quality",
+		  "enabled": true,
+		  "type": "horizontal",
+		  "tag": "_max",
+		  "video": {
+			"width": 2560,
+			"height": 1440,
+			"fps": 60,
+			"codec": "libx265",
+			"bitrate": "85000k",
+			"preset": "slow",
+			"profile": "main10",
+			"gop": 30,
+			"bf": 3,
+			"pix_fmt": "yuv420p10le"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "max_quality_vertical",
+		  "enabled": true,
+		  "type": "vertical",
+		  "tag": "_max_v",
+		  "video": {
+			"width": 1440,
+			"height": 2560,
+			"fps": 60,
+			"codec": "libx265",
+			"bitrate": "85000k",
+			"preset": "slow",
+			"profile": "main10",
+			"gop": 30,
+			"bf": 3,
+			"pix_fmt": "yuv420p10le"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "youtube",
+		  "enabled": true,
+		  "type": "horizontal",
+		  "tag": "_youtube",
+		  "video": {
+			"width": 3840,
+			"height": 2160,
+			"fps": 60,
+			"codec": "libx265",
+			"bitrate": "45000k",
+			"preset": "slow",
+			"profile": "main10",
+			"gop": 60,
+			"bf": 3,
+			"pix_fmt": "yuv420p10le"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "shorts",
+		  "enabled": true,
+		  "type": "vertical",
+		  "tag": "_short",
+		  "video": {
+			"width": 1440,
+			"height": 2560,
+			"fps": 60,
+			"codec": "libx264",
+			"bitrate": "45000k",
+			"preset": "veryslow",
+			"profile": "high",
+			"gop": 60,
+			"bf": 2,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "tiktok",
+		  "enabled": true,
+		  "type": "vertical",
+		  "tag": "_tiktok",
+		  "video": {
+			"width": 1440,
+			"height": 2560,
+			"fps": 60,
+			"codec": "libx264",
+			"bitrate": "20000k",
+			"preset": "slow",
+			"profile": "high",
+			"gop": 60,
+			"bf": 2,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "reels",
+		  "enabled": true,
+		  "type": "vertical",
+		  "tag": "_reels",
+		  "video": {
+			"width": 1440,
+			"height": 2560,
+			"fps": 60,
+			"codec": "libx264",
+			"bitrate": "22000k",
+			"preset": "slow",
+			"profile": "high",
+			"gop": 60,
+			"bf": 2,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "320k"
+		  }
+		},
+		{
+		  "name": "live_horizontal",
+		  "enabled": true,
+		  "type": "horizontal",
+		  "tag": "_live",
+		  "video": {
+			"width": 1920,
+			"height": 1080,
+			"fps": 60,
+			"codec": "libx264",
+			"bitrate": "8000k",
+			"preset": "slow",
+			"profile": "high",
+			"gop": 60,
+			"bf": 2,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "160k"
+		  }
+		},
+		{
+		  "name": "live_vertical",
+		  "enabled": true,
+		  "type": "vertical",
+		  "tag": "_live_v",
+		  "video": {
+			"width": 1080,
+			"height": 1920,
+			"fps": 60,
+			"codec": "libx264",
+			"bitrate": "8000k",
+			"preset": "slow",
+			"profile": "high",
+			"gop": 60,
+			"bf": 2,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "160k"
+		  }
+		},
+		{
+		  "name": "analysis_input",
+		  "enabled": true,
+		  "type": "both",
+		  "tag": "_analysis",
+		  "video": {
+			"width": 1280,
+			"height": 720,
+			"fps": 30,
+			"codec": "libx265",
+			"bitrate": "800k",
+			"preset": "slow",
+			"profile": "main",
+			"gop": 120,
+			"bf": 3,
+			"pix_fmt": "yuv420p"
+		  },
+		  "audio": {
+			"codec": "aac",
+			"bitrate": "192k"
+		  }
+		}
+	]
+  },
   "video_visualizer": {
     "paths": {
       "output": "output/visualizer"
@@ -103,6 +312,5 @@
     "background": {
       "type": "solid",
       "color": "#000000"
-    }
   }
 }

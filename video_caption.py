@@ -6,7 +6,6 @@ from pathlib import Path
 from moviepy import VideoFileClip, CompositeVideoClip, TextClip
 
 BASE_DIR = Path(__file__).resolve().parent
-
 CONFIG_FILE = BASE_DIR / "config.json"
 TASKS_FILE = BASE_DIR / "tasks.json"
 
@@ -17,8 +16,12 @@ def load_config():
 
 def load_tasks():
     if not TASKS_FILE.exists():
+        logging.warning("tasks.json não encontrado")
         return []
-    return json.load(open(TASKS_FILE, encoding="utf-8"))
+
+    tasks = json.load(open(TASKS_FILE, encoding="utf-8"))
+    logging.info(f"{len(tasks)} task(s) carregada(s)")
+    return tasks
 
 def resolve_font(font_name):
     path = BASE_DIR / font_name
@@ -87,11 +90,6 @@ def process_task(task, cfg):
         ).with_duration(clip.duration)
 
         shadow = shadow.with_position((
-            "center",
-            "bottom"
-        ))
-
-        shadow = shadow.with_position((
             style.get("shadow_offset_x", 5),
             style.get("shadow_offset_y", 5)
         ))
@@ -110,7 +108,7 @@ def process_task(task, cfg):
                     "black"
                 ).with_duration(clip.duration)
 
-                stroke = stroke.with_position(("center", "bottom"))
+                stroke = stroke.with_position((dx, dy))
                 layers.append(stroke)
 
     layers.append(base)
@@ -122,35 +120,46 @@ def process_task(task, cfg):
             highlight_word,
             style,
             clip.size,
-            style.get("color_highlight_word", "white")
+            style.get("color_highlight_word", "yellow")
         ).with_duration(clip.duration).with_position(("center", "bottom"))
 
         layers.append(highlight)
 
     final = CompositeVideoClip(layers)
 
-    final.write_videofile(
-        str(output_path),
-        codec="libx264",
-        audio_codec="aac",
-        fps=24,
-        logger=None
-    )
+    try:
+        final.write_videofile(
+            str(output_path),
+            codec="libx264",
+            audio_codec="aac",
+            fps=24
+        )
 
-    clip.close()
-    final.close()
+        logging.info(f"Gerado: {output_path.name}")
 
-    logging.info(f"Gerado: {output_path.name}")
+    except Exception as e:
+        logging.error(f"Erro ao renderizar: {e}")
+        traceback.print_exc()
+
+    finally:
+        clip.close()
+        final.close()
 
 def main():
+    logging.info("Iniciando video_caption...")
+
     cfg = load_config()
     tasks = load_tasks()
+
+    if not tasks:
+        logging.warning("Nenhuma task encontrada")
+        return
 
     for task in tasks:
         try:
             process_task(task, cfg)
         except Exception as e:
-            logging.error(f"Erro: {e}")
+            logging.error(f"Erro geral: {e}")
             traceback.print_exc()
 
 if __name__ == "__main__":
