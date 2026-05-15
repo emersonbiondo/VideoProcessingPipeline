@@ -1,0 +1,10 @@
+{
+  "visualizer": "waveform",
+  "glow_blur": 14,
+  "blend_mode": "lighten",
+  "glow_color": {
+    "r": 1.0,
+    "g": 0.0,
+    "b": 0.0
+  }
+}

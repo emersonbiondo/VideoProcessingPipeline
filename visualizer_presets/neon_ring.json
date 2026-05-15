@@ -1,0 +1,11 @@
+{
+  "visualizer": "neon_ring",
+  "glow_blur": 8,
+  "glow_opacity": 0.45,
+  "ring_size": 0.55,
+  "glow_color": {
+    "r": 0.0,
+    "g": 1.0,
+    "b": 1.0
+  }
+}

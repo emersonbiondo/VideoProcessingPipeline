@@ -1,0 +1,67 @@
+[
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/retro.json",
+    "output": "input_with_audio_retro.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/retro_bars.json",
+    "output": "input_with_audio_retro_bars.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/dense_bars.json",
+    "output": "input_with_audio_dense_bars.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/cyberpunk_mix.json",
+    "output": "input_with_audio_cyberpunk_mix.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/waveform.json",
+    "output": "input_with_audio_waveform.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/horizontal_lines.json",
+    "output": "input_with_audio_horizontal_lines.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/stereo_scope.json",
+    "output": "input_with_audio_stereo_scope.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/pulse.json",
+    "output": "input_with_audio_pulse.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/retro_lines.json",
+    "output": "input_with_audio_retro_lines.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/dense_lines.json",
+    "output": "input_with_audio_dense_lines.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/cyberpunk_lines.json",
+    "output": "input_with_audio_cyberpunk_lines.mp4"
+  },
+  {
+    "input": "test/input_with_audio.mp4",
+    "preset": "visualizer_presets/retro_scope_lines.json",
+    "output": "input_with_audio_retro_scope_lines.mp4"
+  },
+  {
+  "input": "test/input_with_audio.mp4",
+  "preset": "visualizer_presets/neon_ring.json",
+  "output": "input_with_audio_neon_ring.mp4"
+  }
+]

@@ -1,0 +1,15 @@
+{
+  "visualizer": "bars",
+  "win_size": 512,
+  "glow_blur": 6,
+  "glow_opacity": 0.9,
+  "blend_mode": "lighten",
+  "ascale": "log",
+  "fscale": "lin",
+  "cmode": "combined",
+  "glow_color": {
+    "r": 0.0,
+    "g": 1.0,
+    "b": 0.0
+  }
+}

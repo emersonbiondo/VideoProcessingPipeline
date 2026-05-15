@@ -5,6 +5,7 @@ Pipeline modular em Python para processamento completo de vídeo:
 * Encode e compressão (MoviePy)
 * Corte (FFmpeg – fast e precise)
 * Caption com hook + highlight (MoviePy)
+* Audio Visualizers FFT / Audio Reactive
 * Processamento em lote (queue)
 * Execução paralela
 * Retry automático
@@ -17,18 +18,49 @@ Pipeline modular em Python para processamento completo de vídeo:
 ```text
 Video Processing Pipeline/
 │
-├── video_processor.py    encode / fila
-├── video_cut.py          corte via CSV
-├── video_caption.py      hook + highlight
-├── config.json          ️ config central
-├── tasks.json            tarefas caption
-├── fila.txt              lista processor
-├── cortes.csv            lista cortes
+├── video_processor.py
+├── video_cut.py
+├── video_caption.py
+├── video_visualizer.py
+│
+├── config.json
+├── tasks.json
+├── tasks_visualizer.json
+├── fila.txt
+├── cortes.csv
+│
+├── visualizer_presets/
+│   ├── retro.json
+│   ├── retro_bars.json
+│   ├── dense_bars.json
+│   ├── cyberpunk_mix.json
+│   ├── waveform.json
+│   ├── horizontal_lines.json
+│   ├── stereo_scope.json
+│   ├── pulse.json
+│   ├── retro_lines.json
+│   ├── dense_lines.json
+│   ├── cyberpunk_lines.json
+│   ├── retro_scope_lines.json
+│   └── neon_ring.json
+│
+├── src/
+│   ├── visualizer_bars.py
+│   ├── visualizer_waveform.py
+│   ├── visualizer_horizontal_lines.py
+│   ├── visualizer_stereo_scope.py
+│   ├── visualizer_pulse.py
+│   ├── visualizer_line_spectrum.py
+│   └── visualizer_neon_ring.py
+│
+├── test/
+│   └── test_video_visualizer.py
 │
 ├── output/
 │   ├── processor/
 │   ├── cuts/
-│   └── caption/
+│   ├── caption/
+│   └── visualizer/
 ```
 
 ---
@@ -95,16 +127,223 @@ Adiciona hook textual no vídeo.
 
 ---
 
-# Requisitos
+## video_visualizer.py
 
-```bash
-pip install moviepy imageio-ffmpeg openai-whisper
+Sistema modular de visualizers FFT e audio reactive.
+
+### Recursos
+
+- Pipeline por tasks JSON
+- Presets independentes
+- Visualizers modulares
+- Nome de saída customizável
+- Execução manual
+- Glow neon
+- FFT spectrum
+- Waveform
+- Stereo scope
+- Pulse
+- Line spectrum
+- Neon ring
+- Output automático
+- Compatível com FFmpeg
+
+---
+
+# Fluxo do video_visualizer
+
+```text
+tasks_visualizer.json
+        ↓
+load_preset()
+        ↓
+get_video_metadata()
+        ↓
+resolver visualizer
+        ↓
+renderer.render()
+        ↓
+ffmpeg
+        ↓
+output final
 ```
 
-IMPORTANTE:
+---
 
-* Fontes devem estar instaladas no sistema
-* MoviePy precisa de backend de render (Pillow ou ImageMagick)
+# Sistema VISUALIZERS
+
+```python
+VISUALIZERS = {
+    "bars": VisualizerBars,
+    "waveform": VisualizerWaveform,
+    "pulse": VisualizerPulse,
+    "line_spectrum": VisualizerLineSpectrum,
+    "neon_ring": VisualizerNeonRing
+}
+```
+
+---
+
+# Visualizers disponíveis
+
+## 1. Retro Bars
+
+Preset:
+
+```text
+retro.json
+```
+
+Características:
+
+- barras FFT
+- verde neon
+- glow retrô
+
+---
+
+## 2. Dense Bars
+
+Preset:
+
+```text
+dense_bars.json
+```
+
+Características:
+
+- barras densas
+- FFT compacta
+
+---
+
+## 3. Cyberpunk Mix
+
+Preset:
+
+```text
+cyberpunk_mix.json
+```
+
+Características:
+
+- glow cyan
+- visual cyberpunk
+
+---
+
+## 4. Waveform
+
+Preset:
+
+```text
+waveform.json
+```
+
+Características:
+
+- waveform clássico
+
+---
+
+## 5. Horizontal Lines
+
+Preset:
+
+```text
+horizontal_lines.json
+```
+
+Características:
+
+- waveform horizontal
+- linhas centralizadas
+
+---
+
+## 6. Stereo Scope
+
+Preset:
+
+```text
+stereo_scope.json
+```
+
+Características:
+
+- vectorscope estéreo
+- análise L/R
+
+---
+
+## 7. Pulse
+
+Preset:
+
+```text
+pulse.json
+```
+
+Características:
+
+- pulse reactive
+- glow pulsante
+
+---
+
+## 8. Line Spectrum
+
+Renderizador:
+
+```text
+visualizer_line_spectrum.py
+```
+
+Presets:
+
+```text
+retro_lines.json
+dense_lines.json
+cyberpunk_lines.json
+retro_scope_lines.json
+```
+
+Características:
+
+- FFT técnico
+- spectrum analyzer
+- linhas contínuas
+- glow leve
+- estilo científico
+
+Diferença principal:
+
+```text
+bars = colunas FFT
+line_spectrum = traço contínuo FFT
+```
+
+---
+
+## 9. Neon Ring
+
+Renderizador:
+
+```text
+visualizer_neon_ring.py
+```
+
+Preset:
+
+```text
+neon_ring.json
+```
+
+Características:
+
+- glow circular
+- visual synthwave
+- neon reactive
 
 ---
 
@@ -115,6 +354,7 @@ IMPORTANTE:
 * `video_processor`
 * `video_cut`
 * `video_caption`
+* `video_visualizer`
 
 ---
 
@@ -207,8 +447,49 @@ IMPORTANTE:
             "color_highlight_text": "white",
             "color_highlight_word": "yellow"
         }
+    },
+
+    "video_visualizer": {
+
+        "paths": {
+            "output": "output/visualizer"
+        },
+
+        "video": {
+            "fps": 24,
+            "codec": "libx264",
+            "pix_fmt": "yuv420p"
+        }
     }
 }
+```
+
+---
+
+# Tasks Visualizer
+
+Arquivo:
+
+```text
+tasks_visualizer.json
+```
+
+## Exemplo
+
+```json
+[
+    {
+        "input": "test/input.mp4",
+        "preset": "visualizer_presets/retro.json",
+        "output": "input_retro.mp4"
+    },
+
+    {
+        "input": "test/input.mp4",
+        "preset": "visualizer_presets/cyberpunk_lines.json",
+        "output": "input_cyberpunk_lines.mp4"
+    }
+]
 ```
 
 ---
@@ -267,6 +548,94 @@ python video_caption.py
 
 ---
 
+## Visualizer via pipeline
+
+```bash
+python video_visualizer.py tasks_visualizer.json
+```
+
+---
+
+## Visualizer manual
+
+```bash
+python video_visualizer.py input.mp4 visualizer_presets/retro.json
+```
+
+---
+
+## Visualizer manual com output custom
+
+```bash
+python video_visualizer.py input.mp4 visualizer_presets/retro.json --output final.mp4
+```
+
+---
+
+# Sistema de Output
+
+## Output automático
+
+Caso não seja informado:
+
+```json
+"output"
+```
+
+o sistema gera automaticamente:
+
+```text
+input_overlay.mp4
+```
+
+---
+
+## Output customizado
+
+```json
+{
+    "input": "video.mp4",
+    "preset": "visualizer_presets/retro.json",
+    "output": "video_final.mp4"
+}
+```
+
+---
+
+# Sistema de Glow
+
+Utiliza:
+
+- gblur
+- colorchannelmixer
+- blend
+
+Exemplo:
+
+```json
+{
+    "glow_blur": 2,
+    "glow_opacity": 0.20,
+    "blend_mode": "lighten"
+}
+```
+
+---
+
+# Cores
+
+```json
+{
+    "glow_color": {
+        "r": 0.0,
+        "g": 1.0,
+        "b": 0.0
+    }
+}
+```
+
+---
+
 # Saídas
 
 ```text
@@ -279,8 +648,14 @@ output/
 ├── cuts/
 │   ├── video_Intro.mp4
 │
-└── caption/
-    ├── video_final.mp4
+├── caption/
+│   ├── video_final.mp4
+│
+└── visualizer/
+    ├── input_retro.mp4
+    ├── input_waveform.mp4
+    ├── input_pulse.mp4
+    ├── input_lines.mp4
 ```
 
 ---
@@ -300,6 +675,78 @@ Recomendação:
 
 ---
 
-# Licença
+# Testes
 
-Uso livre para automação e projetos próprios.
+Arquivo:
+
+```text
+test/test_video_visualizer.py
+```
+
+Cobertura:
+
+- build_output_path
+- load_preset
+- get_video_metadata
+- process_task
+- visualizer inválido
+- run_pipeline
+- run_manual
+- argparse
+- output automático
+- output custom
+- mocks FFmpeg
+- mocks renderers
+
+Executar:
+
+```bash
+cd test
+
+python -m pytest test_video_visualizer.py -v
+```
+
+---
+
+# Troubleshooting
+
+## Visualizer inválido
+
+Causa:
+- renderer não registrado
+- nome incorreto no preset
+
+---
+
+## FFprobe error
+
+Causa:
+- FFprobe não instalado
+- vídeo inexistente
+
+---
+
+## Barras cinzas
+
+Causa:
+- glow exagerado
+- blend incorreto
+
+Correção:
+- reduzir blur
+- reduzir opacity
+
+---
+
+# Requisitos
+
+```bash
+pip install moviepy imageio-ffmpeg openai-whisper pytest
+```
+
+Necessário:
+
+- FFmpeg
+- FFprobe
+- Python 3.10+
+- MoviePy precisa de backend de render (Pillow ou ImageMagick)

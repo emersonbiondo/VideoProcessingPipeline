@@ -87,5 +87,22 @@
       "color_default": "yellow",
       "color_highlight_word": "white"
     }
+  },
+  
+  "video_visualizer": {
+    "paths": {
+      "output": "output/visualizer"
+    },
+
+    "default_output": {
+      "width": 3840,
+      "height": 2160,
+      "fps": 60
+    },
+
+    "background": {
+      "type": "solid",
+      "color": "#000000"
+    }
   }
 }

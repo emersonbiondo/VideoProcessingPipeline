@@ -1,0 +1,15 @@
+{
+  "visualizer": "line_spectrum",
+  "ascale": "log",
+  "fscale": "log",
+  "win_size": 8192,
+  "cmode": "combined",
+  "glow_blur": 1,
+  "glow_opacity": 0.1,
+  "blend_mode": "lighten",
+  "glow_color": {
+    "r": 0.0,
+    "g": 0.45,
+    "b": 1.0
+  }
+}
