@@ -1,0 +1,20 @@
+[
+  {
+    "input": "test/input_horizontal.mp4",
+    "mode": "loop",
+    "output": "input_horizontal_loop.mp4",
+	"autocomplete": ""
+  },
+  {
+    "input": "test/input_horizontal.mp4",
+    "mode": "loop",
+    "output": "input_horizontal_autocomplete.mp4",
+	"autocomplete": "test/input.mp4"
+  },
+    {
+    "input": "test/input_horizontal.mp4",
+    "mode": "reverse",
+    "output": "input_horizontal_reverse.mp4",
+	"autocomplete": ""
+  }
+]

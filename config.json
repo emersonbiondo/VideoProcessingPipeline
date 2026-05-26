@@ -304,13 +304,23 @@
     },
 
     "default_output": {
-      "width": 3840,
-      "height": 2160,
+      "width": 2560,
+      "height": 1440,
       "fps": 60
     },
 
     "background": {
       "type": "solid",
       "color": "#000000"
+	}
+  },
+  "video_reverse": {
+    "paths": {
+      "output": "output/reverse"
+    },
+
+    "loop": {
+      "remove_duplicate_frame": true
+    }
   }
 }

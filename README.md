@@ -6,6 +6,7 @@ Pipeline modular em Python para processamento completo de vídeo:
 * Corte (FFmpeg – fast e precise)
 * Caption com hook + highlight (MoviePy)
 * Audio Visualizers FFT / Audio Reactive
+* Reverse / Loop / Autocomplete
 * Processamento em lote (queue)
 * Execução paralela
 * Retry automático
@@ -22,10 +23,12 @@ Video Processing Pipeline/
 ├── video_cut.py
 ├── video_caption.py
 ├── video_visualizer.py
+├── video_reverse.py
 │
 ├── config.json
 ├── tasks.json
 ├── tasks_visualizer.json
+├── tasks_reverse.json
 ├── fila.txt
 ├── cortes.csv
 │
@@ -54,13 +57,15 @@ Video Processing Pipeline/
 │   └── visualizer_neon_ring.py
 │
 ├── test/
-│   └── test_video_visualizer.py
+│   ├── test_video_visualizer.py
+│   └── test_video_reverse.py
 │
 ├── output/
 │   ├── processor/
 │   ├── cuts/
 │   ├── caption/
-│   └── visualizer/
+│   ├── visualizer/
+│   └── reverse/
 ```
 
 ---
@@ -70,6 +75,8 @@ Video Processing Pipeline/
 ## video_processor.py
 
 Processa vídeos com encode configurável.
+
+### Recursos
 
 - Resize automático
 - Controle de FPS
@@ -103,7 +110,7 @@ Corta vídeos via CSV.
 ```text
 HEVC (H.265)
 Main10 (10-bit)
-CBR real (ex: 85000k)
+CBR real
 preset veryslow
 ```
 
@@ -117,6 +124,8 @@ preset veryslow
 ## video_caption.py
 
 Adiciona hook textual no vídeo.
+
+### Recursos
 
 - Texto responsivo
 - Highlight de palavra
@@ -150,200 +159,203 @@ Sistema modular de visualizers FFT e audio reactive.
 
 ---
 
-# Fluxo do video_visualizer
+# video_reverse.py
+
+Sistema modular para:
+
+- reverse de vídeo
+- geração de loop
+- autocomplete temporal
+- processamento em lote via JSON
+
+Utiliza:
+
+- FFmpeg
+- ffprobe
+- subprocess
+- imageio_ffmpeg
+
+Compatível com:
+
+- MP4
+- MOV
+- MKV
+- WEBM
+
+---
+
+# Recursos do video_reverse
+
+## Reverse
+
+Gera vídeo reverso:
 
 ```text
-tasks_visualizer.json
+1 2 3 4 5
+↓
+5 4 3 2 1
+```
+
+### Características
+
+- mantém duração
+- mantém FPS
+- mantém resolução
+- remove áudio automaticamente
+- preserva codec compatível
+- output automático
+
+---
+
+## Loop
+
+Gera:
+
+```text
+original + reverse
+```
+
+### Exemplo
+
+```text
+1 2 3 4 5 4 3 2 1
+```
+
+### Características
+
+- loop suave
+- sem frame duplicado
+- sem áudio
+- compatível com autocomplete
+
+---
+
+## remove_duplicate_frame
+
+Evita duplicação entre:
+
+### original ↔ reverse
+
+Evita:
+
+```text
+...5][5...
+```
+
+---
+
+### loop ↔ loop
+
+Evita:
+
+```text
+...1][1...
+```
+
+durante autocomplete.
+
+---
+
+# Autocomplete
+
+Expande automaticamente o loop até atingir:
+
+- áudio
+- vídeo
+- mídia externa
+
+Compatível com:
+
+- mp3
+- wav
+- flac
+- mp4
+- mkv
+- mov
+- webm
+
+---
+
+# Fluxo do autocomplete
+
+```text
+original + reverse
         ↓
-load_preset()
+gera loop base
         ↓
-get_video_metadata()
+repete automaticamente
         ↓
-resolver visualizer
+remove frames duplicados
         ↓
-renderer.render()
+trim final
         ↓
-ffmpeg
-        ↓
-output final
+duração final
 ```
 
 ---
 
-# Sistema VISUALIZERS
+# Precisão temporal
 
-```python
-VISUALIZERS = {
-    "bars": VisualizerBars,
-    "waveform": VisualizerWaveform,
-    "pulse": VisualizerPulse,
-    "line_spectrum": VisualizerLineSpectrum,
-    "neon_ring": VisualizerNeonRing
-}
-```
+O sistema:
 
----
-
-# Visualizers disponíveis
-
-## 1. Retro Bars
-
-Preset:
-
-```text
-retro.json
-```
-
-Características:
-
-- barras FFT
-- verde neon
-- glow retrô
+- trabalha em milissegundos
+- usa duração real via ffprobe
+- prioriza frame inteiro válido
+- nunca termina antes da referência
+- aceita pequeno excesso temporal
+- utiliza arredondamento para cima
 
 ---
 
-## 2. Dense Bars
+# Batch JSON
 
-Preset:
+Arquivo:
 
 ```text
-dense_bars.json
+tasks_reverse.json
 ```
 
-Características:
+## Exemplo
 
-- barras densas
-- FFT compacta
+```json
+[
+  {
+    "input": "test/input_horizontal.mp4",
+    "mode": "loop",
+    "output": "input_horizontal_loop.mp4",
+    "autocomplete": ""
+  },
+
+  {
+    "input": "test/input_horizontal.mp4",
+    "mode": "loop",
+    "output": "input_horizontal_autocomplete.mp4",
+    "autocomplete": "test/input.mp3"
+  },
+
+  {
+    "input": "test/input_horizontal.mp4",
+    "mode": "reverse",
+    "output": "input_horizontal_reverse.mp4",
+    "autocomplete": ""
+  }
+]
+```
+
+⚠️ IMPORTANTE:
+
+O último item NÃO pode possuir vírgula extra.
 
 ---
 
-## 3. Cyberpunk Mix
+# Estrutura do JSON
 
-Preset:
-
-```text
-cyberpunk_mix.json
-```
-
-Características:
-
-- glow cyan
-- visual cyberpunk
-
----
-
-## 4. Waveform
-
-Preset:
-
-```text
-waveform.json
-```
-
-Características:
-
-- waveform clássico
-
----
-
-## 5. Horizontal Lines
-
-Preset:
-
-```text
-horizontal_lines.json
-```
-
-Características:
-
-- waveform horizontal
-- linhas centralizadas
-
----
-
-## 6. Stereo Scope
-
-Preset:
-
-```text
-stereo_scope.json
-```
-
-Características:
-
-- vectorscope estéreo
-- análise L/R
-
----
-
-## 7. Pulse
-
-Preset:
-
-```text
-pulse.json
-```
-
-Características:
-
-- pulse reactive
-- glow pulsante
-
----
-
-## 8. Line Spectrum
-
-Renderizador:
-
-```text
-visualizer_line_spectrum.py
-```
-
-Presets:
-
-```text
-retro_lines.json
-dense_lines.json
-cyberpunk_lines.json
-retro_scope_lines.json
-```
-
-Características:
-
-- FFT técnico
-- spectrum analyzer
-- linhas contínuas
-- glow leve
-- estilo científico
-
-Diferença principal:
-
-```text
-bars = colunas FFT
-line_spectrum = traço contínuo FFT
-```
-
----
-
-## 9. Neon Ring
-
-Renderizador:
-
-```text
-visualizer_neon_ring.py
-```
-
-Preset:
-
-```text
-neon_ring.json
-```
-
-Características:
-
-- glow circular
-- visual synthwave
-- neon reactive
+| Campo | Obrigatório | Descrição |
+|---|---|---|
+| `input` | sim | vídeo de entrada |
+| `mode` | sim | reverse ou loop |
+| `output` | não | nome customizado |
+| `autocomplete` | não | mídia de referência |
 
 ---
 
@@ -351,145 +363,26 @@ Características:
 
 ## Estrutura
 
-* `video_processor`
-* `video_cut`
-* `video_caption`
-* `video_visualizer`
+- video_processor
+- video_cut
+- video_caption
+- video_visualizer
+- video_reverse
 
 ---
 
-## Exemplo completo
+## Configuração do video_reverse
 
 ```json
-{
-    "video_processor": {
-        "paths": {
-            "output": "output/processor"
-        },
-        "video": {
-            "res_max": 720,
-            "fps": 12,
-            "bitrate": "2000k",
-            "preset": "medium",
-            "pix_fmt": "yuv420p",
-            "audio_codec": "aac",
-            "audio_bitrate": "192k",
-            "mute_video": false
-        },
-        "file": {
-            "suffix": "_processed"
-        },
-        "queue": {
-            "success": "queue_success.txt",
-            "error": "queue_error.txt",
-            "max_retries": 2,
-            "retry_delay": 3,
-            "max_workers": 2
-        },
-        "audio": {
-            "enabled": true,
-            "codec": "mp3",
-            "bitrate": "192k",
-            "extension": "mp3"
-        },
-        "transcription": {
-            "enabled": true,
-            "model": "base"
-        },
-        "subtitle": {
-            "enabled": true,
-            "format": "srt"
-        }
+"video_reverse": {
+    "paths": {
+        "output": "output/reverse"
     },
 
-    "video_cut": {
-        "paths": {
-            "output": "output/cuts"
-        },
-        "mode": "fast",
-        "precise": {
-            "bitrate": "85000k",
-            "preset": "veryslow",
-            "profile": "main10",
-            "level": "5.1",
-            "audio_codec": "aac",
-            "audio_bitrate": "192k"
-        }
-    },
-
-    "video_caption": {
-        "paths": {
-            "output": "output/caption"
-        },
-        "video": {
-            "threads": 4,
-            "logger": null
-        },
-        "hook": {
-            "start_time": 0.5,
-            "duration": 5.0,
-            "pos_y_percent": 0.20,
-            "width_percent": 0.80,
-            "fade_in_duration": 0.3,
-            "fade_out_duration": 0.5
-        },
-        "text_style": {
-            "font": "Bebas-Neue",
-            "font_size": 90,
-            "show_stroke": true,
-            "stroke_width": 1.5,
-            "show_shadow": true,
-            "shadow_opacity": 0.6,
-            "shadow_offset_x": 5,
-            "shadow_offset_y": 5,
-            "interline": -5,
-            "color_default": "yellow",
-            "color_highlight_text": "white",
-            "color_highlight_word": "yellow"
-        }
-    },
-
-    "video_visualizer": {
-
-        "paths": {
-            "output": "output/visualizer"
-        },
-
-        "video": {
-            "fps": 24,
-            "codec": "libx264",
-            "pix_fmt": "yuv420p"
-        }
+    "loop": {
+        "remove_duplicate_frame": true
     }
 }
-```
-
----
-
-# Tasks Visualizer
-
-Arquivo:
-
-```text
-tasks_visualizer.json
-```
-
-## Exemplo
-
-```json
-[
-    {
-        "input": "test/input.mp4",
-        "preset": "visualizer_presets/retro.json",
-        "output": "input_retro.mp4"
-    },
-
-    {
-        "input": "test/input.mp4",
-        "preset": "visualizer_presets/cyberpunk_lines.json",
-        "output": "input_cyberpunk_lines.mp4"
-    }
-]
 ```
 
 ---
@@ -514,13 +407,6 @@ python video_processor.py fila.txt
 
 ## Cortar vídeo
 
-CSV:
-
-```text
-00:05,00:10,Intro
-00:10,00:20,Part1
-```
-
 ```bash
 python video_cut.py cortes.csv video.mp4
 ```
@@ -528,19 +414,6 @@ python video_cut.py cortes.csv video.mp4
 ---
 
 ## Caption
-
-tasks.json:
-
-```json
-[
-    {
-        "input": "video.mp4",
-        "text": "How to automate videos with python",
-        "highlight": "python",
-        "output": "video_final.mp4"
-    }
-]
-```
 
 ```bash
 python video_caption.py
@@ -556,18 +429,80 @@ python video_visualizer.py tasks_visualizer.json
 
 ---
 
-## Visualizer manual
+## Reverse
 
 ```bash
-python video_visualizer.py input.mp4 visualizer_presets/retro.json
+python video_reverse.py video.mp4 --reverse
 ```
 
 ---
 
-## Visualizer manual com output custom
+## Loop
 
 ```bash
-python video_visualizer.py input.mp4 visualizer_presets/retro.json --output final.mp4
+python video_reverse.py video.mp4 --loop
+```
+
+---
+
+## Loop com autocomplete
+
+```bash
+python video_reverse.py video.mp4 --loop --autocomplete musica.mp3
+```
+
+---
+
+## Batch JSON
+
+```bash
+python video_reverse.py tasks_reverse.json
+```
+
+---
+
+# Output automático
+
+## Reverse
+
+```text
+video_reverse.mp4
+```
+
+---
+
+## Loop
+
+```text
+video_loop.mp4
+```
+
+---
+
+# Output customizado
+
+```json
+{
+    "input": "video.mp4",
+    "mode": "loop",
+    "output": "video_final.mp4"
+}
+```
+
+---
+
+# Saídas
+
+```text
+output/
+├── processor/
+├── cuts/
+├── caption/
+├── visualizer/
+└── reverse/
+    ├── video_reverse.mp4
+    ├── video_loop.mp4
+    └── ambient_loop.mp4
 ```
 
 ---
@@ -582,23 +517,60 @@ Caso não seja informado:
 "output"
 ```
 
-o sistema gera automaticamente:
-
-```text
-input_overlay.mp4
-```
+o sistema gera automaticamente.
 
 ---
 
 ## Output customizado
 
-```json
-{
-    "input": "video.mp4",
-    "preset": "visualizer_presets/retro.json",
-    "output": "video_final.mp4"
-}
-```
+Compatível com:
+
+- reverse
+- loop
+- autocomplete
+
+---
+
+# Visualizers disponíveis
+
+## Retro Bars
+
+- barras FFT
+- glow retrô
+
+## Dense Bars
+
+- FFT compacta
+
+## Cyberpunk Mix
+
+- glow cyan
+- estilo cyberpunk
+
+## Waveform
+
+- waveform clássico
+
+## Horizontal Lines
+
+- waveform horizontal
+
+## Stereo Scope
+
+- vectorscope estéreo
+
+## Pulse
+
+- pulse reactive
+
+## Line Spectrum
+
+- spectrum analyzer contínuo
+
+## Neon Ring
+
+- glow circular
+- synthwave
 
 ---
 
@@ -610,54 +582,6 @@ Utiliza:
 - colorchannelmixer
 - blend
 
-Exemplo:
-
-```json
-{
-    "glow_blur": 2,
-    "glow_opacity": 0.20,
-    "blend_mode": "lighten"
-}
-```
-
----
-
-# Cores
-
-```json
-{
-    "glow_color": {
-        "r": 0.0,
-        "g": 1.0,
-        "b": 0.0
-    }
-}
-```
-
----
-
-# Saídas
-
-```text
-output/
-├── processor/
-│   ├── video_processed.mp4
-│   ├── queue_success.txt
-│   └── queue_error.txt
-│
-├── cuts/
-│   ├── video_Intro.mp4
-│
-├── caption/
-│   ├── video_final.mp4
-│
-└── visualizer/
-    ├── input_retro.mp4
-    ├── input_waveform.mp4
-    ├── input_pulse.mp4
-    ├── input_lines.mp4
-```
-
 ---
 
 # Paralelismo
@@ -666,75 +590,84 @@ output/
 "max_workers": 2
 ```
 
-Recomendação:
-
-| CPU     | Workers |
-| ------- | ------- |
-| 4 cores | 1–2     |
-| 8 cores | 2–4     |
-
 ---
 
 # Testes
 
-Arquivo:
+## Arquivos
 
 ```text
 test/test_video_visualizer.py
+test/test_video_reverse.py
 ```
 
-Cobertura:
+---
 
-- build_output_path
-- load_preset
-- get_video_metadata
-- process_task
-- visualizer inválido
-- run_pipeline
-- run_manual
-- argparse
-- output automático
-- output custom
-- mocks FFmpeg
-- mocks renderers
+# Cobertura do test_video_reverse
 
-Executar:
+- reverse
+- loop
+- remove_duplicate_frame
+- autocomplete
+- batch json
+- preservação de FPS
+- preservação de resolução
+- sem áudio
+- precisão temporal
+
+---
+
+# Executar testes
+
+Executar pela raiz do projeto:
 
 ```bash
-cd test
+python -m pytest test/test_video_reverse.py -v
+```
 
-python -m pytest test_video_visualizer.py -v
+---
+
+# Resultado esperado
+
+```text
+5 passed
 ```
 
 ---
 
 # Troubleshooting
 
-## Visualizer inválido
+## JSONDecodeError
 
 Causa:
-- renderer não registrado
-- nome incorreto no preset
+
+- vírgula extra no último item do JSON
 
 ---
 
 ## FFprobe error
 
 Causa:
-- FFprobe não instalado
+
+- FFmpeg/FFprobe ausente
 - vídeo inexistente
 
 ---
 
-## Barras cinzas
+## Loop travando
 
 Causa:
-- glow exagerado
-- blend incorreto
 
-Correção:
-- reduzir blur
-- reduzir opacity
+- remove_duplicate_frame desativado
+
+---
+
+## Autocomplete menor que referência
+
+O sistema foi projetado para:
+
+- nunca terminar antes
+- priorizar frame inteiro válido
 
 ---
 
@@ -749,4 +682,3 @@ Necessário:
 - FFmpeg
 - FFprobe
 - Python 3.10+
-- MoviePy precisa de backend de render (Pillow ou ImageMagick)

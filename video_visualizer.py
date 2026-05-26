@@ -1,5 +1,6 @@
 import argparse
 import json
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -29,16 +30,53 @@ VISUALIZERS = {
 }
 
 
-def get_video_metadata(input_path):
+def load_global_config():
+
+    config_path = Path("config.json")
+
+    if not config_path.exists():
+
+        return {}
+
+    with open(
+        config_path,
+        "r",
+        encoding="utf-8"
+    ) as f:
+
+        return json.load(f)
+
+
+def get_video_metadata(
+    input_path,
+    config
+):
+
+    default_output = config.get(
+        "default_output",
+        {}
+    )
+
+    default_width = default_output.get(
+        "width",
+        2560
+    )
+
+    default_height = default_output.get(
+        "height",
+        1440
+    )
+
+    default_fps = default_output.get(
+        "fps",
+        60
+    )
 
     command = [
         "ffprobe",
         "-v",
         "error",
-        "-select_streams",
-        "v:0",
-        "-show_entries",
-        "stream=width,height,r_frame_rate",
+        "-show_streams",
         "-of",
         "json",
         str(input_path)
@@ -53,24 +91,45 @@ def get_video_metadata(input_path):
 
     data = json.loads(result.stdout)
 
-    stream = data["streams"][0]
+    video_streams = [
+        s for s in data.get("streams", [])
+        if s.get("codec_type") == "video"
+    ]
 
-    fps_raw = stream["r_frame_rate"]
+    if video_streams:
 
-    if "/" in fps_raw:
+        stream = video_streams[0]
 
-        num, den = fps_raw.split("/")
+        fps_raw = stream.get(
+            "r_frame_rate",
+            f"{default_fps}/1"
+        )
 
-        fps = float(num) / float(den)
+        if "/" in fps_raw:
 
-    else:
+            num, den = fps_raw.split("/")
 
-        fps = float(fps_raw)
+            fps = float(num) / float(den)
+
+        else:
+
+            fps = float(fps_raw)
+
+        return {
+            "width": default_width,
+            "height": default_height,
+            "fps": fps
+        }
+
+    print(
+        "INFO: Arquivo sem vídeo. "
+        "Usando default_output."
+    )
 
     return {
-        "width": stream["width"],
-        "height": stream["height"],
-        "fps": fps
+        "width": default_width,
+        "height": default_height,
+        "fps": default_fps
     }
 
 
@@ -106,6 +165,74 @@ def load_preset(
         return json.load(f)
 
 
+def has_audio_stream(
+    input_path
+):
+
+    command = [
+        "ffprobe",
+        "-v",
+        "error",
+        "-select_streams",
+        "a",
+        "-show_entries",
+        "stream=index",
+        "-of",
+        "csv=p=0",
+        str(input_path)
+    ]
+
+    result = subprocess.run(
+        command,
+        capture_output=True,
+        text=True
+    )
+
+    return bool(
+        result.stdout.strip()
+    )
+
+
+def mux_audio(
+    video_path,
+    audio_source_path
+):
+
+    temp_output = (
+        video_path.parent /
+        f"{video_path.stem}_temp.mp4"
+    )
+
+    command = [
+        "ffmpeg",
+        "-y",
+        "-i",
+        str(video_path),
+        "-i",
+        str(audio_source_path),
+        "-c:v",
+        "copy",
+        "-c:a",
+        "aac",
+        "-b:a",
+        "320k",
+        "-shortest",
+        str(temp_output)
+    ]
+
+    subprocess.run(
+        command,
+        check=True
+    )
+
+    video_path.unlink()
+
+    shutil.move(
+        str(temp_output),
+        str(video_path)
+    )
+
+
 def process_task(
     task,
     config
@@ -136,7 +263,10 @@ def process_task(
 
     output_dir = Path(
         config.get(
-            "output_dir",
+            "paths",
+            {}
+        ).get(
+            "output",
             "output/visualizer"
         )
     )
@@ -157,7 +287,8 @@ def process_task(
     )
 
     metadata = get_video_metadata(
-        input_path
+        input_path,
+        config
     )
 
     print(
@@ -172,6 +303,19 @@ def process_task(
         metadata=metadata,
         config=config
     )
+
+    if has_audio_stream(
+        input_path
+    ):
+
+        print(
+            "INFO: Adicionando áudio..."
+        )
+
+        mux_audio(
+            video_path=output_path,
+            audio_source_path=input_path
+        )
 
     print(
         f"INFO: Finalizado: "
@@ -191,9 +335,12 @@ def run_pipeline(
 
         tasks = json.load(f)
 
-    config = {
-        "output_dir": "output/visualizer"
-    }
+    global_config = load_global_config()
+
+    config = global_config.get(
+        "video_visualizer",
+        {}
+    )
 
     for task in tasks:
 
@@ -209,9 +356,12 @@ def run_manual(
     output=None
 ):
 
-    config = {
-        "output_dir": "output/visualizer"
-    }
+    global_config = load_global_config()
+
+    config = global_config.get(
+        "video_visualizer",
+        {}
+    )
 
     task = {
         "input": input_path,
